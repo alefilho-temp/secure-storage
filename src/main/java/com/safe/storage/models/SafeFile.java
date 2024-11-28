@@ -49,11 +49,11 @@ public class SafeFile {
         this.data = data;
     }
 
-    int size;
-    public int getSize() {
+    long size;
+    public long getSize() {
         return size;
     }
-    public void setSize(int size) {
+    public void setSize(long size) {
         this.size = size;
     }
 }

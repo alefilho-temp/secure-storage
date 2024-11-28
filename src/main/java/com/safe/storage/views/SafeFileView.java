@@ -146,7 +146,7 @@ public class SafeFileView extends SplitPane {
                 if (selectedFile != null) {
                     byte[] fileData = Files.readAllBytes(selectedFile.toPath());
                     safeFile.setData(fileData);
-                    safeFile.setSize((int) selectedFile.length());
+                    safeFile.setSize(selectedFile.length());
                 }
                 controller.save(safeFile);
                 loadSafeFiles();
@@ -195,7 +195,7 @@ public class SafeFileView extends SplitPane {
 
         colFileSize.setCellValueFactory(cellData -> {
             SafeFile safeFile = cellData.getValue();
-            return new SimpleObjectProperty <>(formatBytes(safeFile.getSize()));
+            return new SimpleObjectProperty<>(formatBytes(safeFile.getSize()));
         });
 
         tableView.getColumns().addAll(colName, colOriginalName, colNote, colFilePath, colFileSize, colActions);
@@ -307,6 +307,24 @@ public class SafeFileView extends SplitPane {
         Bindings.bindBidirectional(txtNote.textProperty(), controller.noteProperty());
         // Bind the original name and file size labels if needed
     }
+
+    // private void populateFields(SafeFile safeFile) {
+    //     lblId.setText(String.valueOf(safeFile.getId()));
+    //     txtName.setText(safeFile.getName());
+    //     txtOriginalName.setText(safeFile.getOriginalName());
+    //     txtNote.setText(safeFile.getNote());
+    //     lblFilePath.setText(safeFile.getOriginalName());
+    //     lblFileSize.setText(formatBytes(safeFile.getSize()));
+    //     if (selectedFile == null) {
+    //         selectedFile = new File("src/main/resources/temp");
+    //         try {
+    //             Files.write(Paths.get("src/main/resources/temp"), safeFile.getData(), StandardOpenOption.CREATE_NEW);
+    //         } catch (IOException e) {
+    //             // TODO Auto-generated catch block
+    //             e.printStackTrace();
+    //         }
+    //     }
+    // }
 
     private void populateFields(SafeFile safeFile) {
         lblId.setText(String.valueOf(safeFile.getId()));

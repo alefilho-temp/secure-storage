@@ -100,7 +100,6 @@ public class SignInView extends FlowPane {
         getChildren().add(vBox);
 
         addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            System.out.println("SSSSS");
             if (event.getCode() == KeyCode.ENTER) {
                 event.consume();
                 if (!passwordInput.getText().equals(passwordConfirmationInput.getText())) {

@@ -11,14 +11,14 @@ import java.util.Optional;
 import com.safe.storage.common.Login;
 import com.safe.storage.database.DBConnection;
 import com.safe.storage.models.SafePassword;
+import com.safe.storage.security.Crypto;
 import com.safe.storage.security.SafePasswordCode;
 
 public class SafePasswordDao implements Dao<SafePassword> {
     
     // Method to save the image and return the new path
     public String saveImage(File imageFile) {
-        System.out.println(imageFile.toPath());
-        System.out.println(imageFile.getAbsolutePath());
+
         try {
             // Define the target directory (e.g., in the resources folder)
             String targetDirectory = "src/main/resources/images"; // Adjust this path as necessary
@@ -28,15 +28,14 @@ public class SafePasswordDao implements Dao<SafePassword> {
             if (!dir.exists()) {System.out.println("semdir");
                 dir.mkdirs();
             }
-            System.out.println("scomdir");
+
             // Define the new file path
             String newFileName = System.currentTimeMillis() + "_" + imageFile.getName(); // Unique name
             File newFile = new File(dir, newFileName);
-            System.out.println("newFileName " + newFileName);
-            System.out.println("newFile " + newFile);
+
             // Copy the file to the new location
             Files.copy(imageFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("asasdasd " );
+
             // Return the new file path (you can store this in the database)
             return newFile.getAbsolutePath();
         } catch (Exception e) {
@@ -47,6 +46,8 @@ public class SafePasswordDao implements Dao<SafePassword> {
 
     @Override
     public Optional<SafePassword> create(SafePassword newObject) {
+        String imagePath = newObject.getImagePath();
+
         newObject = new SafePasswordCode().encode(newObject);
 
         String sql = "INSERT INTO safe_passwords (userId, imagePath, name, accessUrl, note, username, password) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -54,8 +55,10 @@ public class SafePasswordDao implements Dao<SafePassword> {
             Connection connection = DBConnection.connect();
             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
+            imagePath = saveImage(new File(imagePath));
+
             pstmt.setInt(1, Login.getUser().getId());
-            pstmt.setString(2, saveImage(new File(newObject.getImagePath())));
+            pstmt.setString(2, Crypto.encryptString(Login.getUser().getPassword(), imagePath).get());
             pstmt.setString(3, newObject.getName());
             pstmt.setString(4, newObject.getAccessUrl());
             pstmt.setString(5, newObject.getNote());
@@ -113,6 +116,8 @@ public class SafePasswordDao implements Dao<SafePassword> {
 
     @Override
     public boolean update(SafePassword newObject) {
+        String imagePath = newObject.getImagePath();
+
         newObject = new SafePasswordCode().encode(newObject);
 
         String sql = "UPDATE safe_passwords SET imagePath = ?, name = ?, accessUrl = ?, note = ?, username = ?, password = ? WHERE id = ? AND userId = ?";
@@ -120,7 +125,9 @@ public class SafePasswordDao implements Dao<SafePassword> {
             Connection connection = DBConnection.connect();
             PreparedStatement pstmt = connection.prepareStatement(sql)
         ) {
-            pstmt.setString(1, saveImage(new File(newObject.getImagePath())));
+            imagePath = saveImage(new File(imagePath));
+            
+            pstmt.setString(1, Crypto.encryptString(Login.getUser().getPassword(), imagePath).get());
             pstmt.setString(2, newObject.getName());
             pstmt.setString(3, newObject.getAccessUrl());
             pstmt.setString(4, newObject.getNote());

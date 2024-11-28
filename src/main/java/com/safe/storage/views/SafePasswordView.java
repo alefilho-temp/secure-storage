@@ -1,3 +1,366 @@
+// package com.safe.storage.views;
+
+// import com.safe.storage.common.ViewController;
+// import com.safe.storage.controllers.SafePasswordController;
+// import com.safe.storage.models.SafePassword;
+// import javafx.beans.binding.Bindings;
+// import javafx.beans.property.SimpleObjectProperty;
+// import javafx.collections.ObservableList;
+// import javafx.scene.control.*;
+// import javafx.scene.control.cell.PropertyValueFactory;
+// import javafx.scene.image.Image;
+// import javafx.scene.image.ImageView;
+// import javafx.scene.layout.BorderPane;
+// import javafx.scene.layout.GridPane;
+// import javafx.stage.FileChooser;
+// import javafx.stage.Stage;
+// import javafx.util.Callback;
+
+// import java.io.File;
+
+// public class SafePasswordView extends BorderPane {
+//     private Label lblId = new Label(""); // Label to hold the ID but not displayed in the UI
+//     private TextField txtName = new TextField("");
+//     private TextField txtUsername = new TextField("");
+//     private TextField txtPassword = new TextField("");
+//     private TextField txtAccessUrl = new TextField("");
+//     private TextArea txtNote = new TextArea(""); // Changed to TextArea for multi-line input
+//     private TextField txtImagePath = new TextField(""); // Field for image path
+//     private ImageView imageView = new ImageView("/placeholder.png"); // Placeholder image
+
+//     private TableView<SafePassword> tableView = new TableView<>();
+//     private SafePasswordController controller;
+
+//     public SafePasswordView() {
+//         controller = new SafePasswordController();
+
+//         GridPane formPane = createFormPane();
+//         setTop(formPane);
+//         setCenter(tableView);
+//         generateColumns();
+//         bindProperties();
+//         loadSafePasswords();
+//     }
+
+//     private GridPane createFormPane() {
+//         GridPane formPane = new GridPane();
+//         addFormFields(formPane);
+//         addButtons(formPane);
+//         return formPane;
+//     }
+
+//     private void addFormFields(GridPane formPane) {
+//         formPane.add(new Label("ID: "), 0, 0);
+//         formPane.add(lblId, 1, 0);
+//         formPane.add(new Label("Name: "), 0, 1);
+//         formPane.add(txtName, 1, 1);
+//         formPane.add(new Label("Username: "), 0, 2);
+//         formPane.add(txtUsername, 1, 2);
+//         formPane.add(new Label("Password: "), 0, 3);
+//         formPane.add(txtPassword, 1, 3);
+//         formPane.add(new Label("Access URL: "), 0, 4);
+//         formPane.add(txtAccessUrl, 1, 4);
+//         formPane.add(new Label("Note: "), 0, 5);
+//         formPane.add(txtNote, 1, 5);
+//         formPane.add(new Label("Image Path: "), 0, 6);
+//         formPane.add(txtImagePath, 1, 6);
+        
+//         // Set the ImageView properties
+//         imageView.setFitHeight(150);
+//         imageView.setFitWidth(150);
+//         imageView.setPreserveRatio(true);
+//         formPane.add(imageView, 1, 8); // Add ImageView to the form
+
+//         // Add a listener to the image path text field
+//         txtImagePath.textProperty().addListener((observable, oldValue, newValue) -> {
+//             if (!newValue.isEmpty()) {
+//                 displayImage(new File(newValue)); // Display the image when the text field changes
+//             } else {
+//                 imageView.setImage(new Image("/placeholder.png")); // Reset to placeholder if empty
+//             }
+//         });
+//     }
+
+//     private void addButtons(GridPane formPane) {
+//         Button btnChooseImage = createChooseImageButton();
+//         formPane.add(btnChooseImage, 2, 6); // Add button to form
+
+//         Button btnSave = createSaveButton();
+//         Button btnSearch = createSearchButton();
+//         Button btnClear = createClearButton();
+
+//         formPane.add(btnSave, 0, 7);
+//         formPane.add(btnSearch, 1, 7);
+//         formPane.add(btnClear, 2, 0);
+//     }
+
+//     private Button createChooseImageButton() {
+//         Button btnChooseImage = new Button("Choose Image");
+//         btnChooseImage.setOnAction(e -> {
+//             FileChooser fileChooser = new FileChooser();
+//             File file = fileChooser.showOpenDialog(new Stage());
+//             if (file != null) {
+//                 txtImagePath.setText(file.getAbsolutePath());
+//                 displayImage(file);
+//                 if (!validImage(file)) {
+//                     ViewController.showAlert("Error", "Unsupported image format. Please use PNG or JPG.");
+//                 }
+//             }
+//         });
+//         return btnChooseImage;
+//     }
+
+//     private Button createSaveButton() {
+//         Button btnSave = new Button("Save");
+//         btnSave.setOnAction(e -> {
+//             try {
+//                 SafePassword safePassword = new SafePassword();
+//                 if (!lblId.getText().isEmpty()) {
+//                     safePassword.setId(Integer.parseInt(lblId.getText()));
+//                 }
+//                 populateSafePassword(safePassword);
+//                 controller.save(safePassword);
+//                 tableView.refresh();
+//                 clear();
+//             } catch (Exception err) {
+//                 ViewController.showAlert("Error", "Error saving SafePassword");
+//             }
+//         });
+//         return btnSave;
+//     }
+
+//     private Button createSearchButton() {
+//         Button btnSearch = new Button("Search");
+//         btnSearch.setOnAction(e -> {
+//             String searchName = txtName.getText();
+
+//             if (searchName.trim().length() == 0) {
+//                 clear();
+//                 controller.loadAllPasswords();
+//             } else {
+//                 ObservableList<SafePassword> result = controller.searchBy("name", searchName);
+//                 if (!result.isEmpty()) {
+//                     populateFields(result.get(0));
+//                     displayImage(new File(result.get(0).getImagePath()));
+//                 }
+//             }
+//         });
+
+//         return btnSearch;
+//     }
+
+//     private Button createClearButton() {
+//         Button btnClear = new Button("Clear");
+//         btnClear.setOnAction(e -> clear());
+//         return btnClear;
+//     }
+
+//     private void populateSafePassword(SafePassword safePassword) {
+//         safePassword.setName(txtName.getText());
+//         safePassword.setUsername(txtUsername.getText());
+//         safePassword.setPassword(txtPassword.getText());
+//         safePassword.setAccessUrl(txtAccessUrl.getText());
+//         safePassword.setNote(txtNote.getText());
+//         safePassword.setImagePath(txtImagePath.getText());
+//     }
+
+//     private void populateFields(SafePassword safePassword) {
+//         lblId.setText(String.valueOf(safePassword.getId()));
+//         txtName.setText(safePassword.getName());
+//         txtUsername.setText(safePassword.getUsername());
+//         txtPassword.setText(safePassword.getPassword());
+//         txtAccessUrl.setText(safePassword.getAccessUrl());
+//         txtNote.setText(safePassword.getNote());
+//         txtImagePath.setText(safePassword.getImagePath());
+//     }
+
+//     private void loadSafePasswords() {
+//         try {
+//             tableView.setItems(controller.findAll());
+//         } catch (Exception e) {
+//             ViewController.showAlert("Error", "Error loading SafePasswords");
+//         }
+//     }
+
+//     private void clear() {
+//         controller.clearFields();
+//         tableView.getSelectionModel().clearSelection();
+//         lblId.setText("");
+//     }
+
+//     private void displayImage(File file) {
+//         String filePath = file.toURI().toString();
+//         if (validImage(file)) {
+//             imageView.setImage(new Image(filePath));
+//         } else {
+//             imageView.setImage(new Image("/placeholder.png"));
+//         }
+//     }
+
+//     private boolean validImage(File file) {
+//         String filePath = file.toURI().toString();
+//         String fileExtension = getFileExtension(filePath);
+
+//         return 
+//             fileExtension.equalsIgnoreCase("png") || 
+//             fileExtension.equalsIgnoreCase("jpg") || 
+//             fileExtension.equalsIgnoreCase("jpeg")
+//         ;
+//     }
+
+//     private String getFileExtension(String filePath) {
+//         int lastIndexOfDot = filePath.lastIndexOf('.');
+
+//         return (lastIndexOfDot == -1) ? "" : filePath.substring(lastIndexOfDot + 1);
+//     }
+
+//     public void generateColumns() {
+//         TableColumn<SafePassword, Image> colImage = createImageColumn();
+//         TableColumn<SafePassword, String> colName = createStringColumn("Name", "name");
+//         TableColumn<SafePassword, String> colUsername = createStringColumn("Username", "username");
+//         TableColumn<SafePassword, String> colPassword = createStringColumn("Password", "password");
+//         TableColumn<SafePassword, String> colAccessUrl = createStringColumn("Access URL", "accessUrl");
+//         TableColumn<SafePassword, String> colNote = createStringColumn("Note", "note");
+//         TableColumn<SafePassword, Void> colActions = createActionColumn();
+
+//         tableView.getColumns().addAll(colImage, colName, colUsername, colPassword, colAccessUrl, colNote, colActions);
+//         tableView.getSelectionModel().selectedItemProperty()
+//             .addListener((obs, oldSelection, newSelection) -> {
+//                 if (newSelection != null) {
+//                     populateFields(newSelection);
+//                     displayImage(new File(newSelection.getImagePath()));
+//                 }
+//             });
+//     }
+
+//     private TableColumn<SafePassword, Image> createImageColumn() {
+//         TableColumn<SafePassword, Image> colImage = new TableColumn<>("Image");
+//         colImage.setCellValueFactory(param -> {
+//             ImageView imageView = new ImageView();
+//             imageView.setFitHeight(50);
+//             imageView.setFitWidth(50);
+//             String imagePath = param.getValue().getImagePath();
+//             imageView.setImage(validImage(new File(imagePath)) ? new Image(new File(imagePath).toURI().toString()) : new Image("/placeholder.png"));
+//             return new SimpleObjectProperty<>(imageView.getImage());
+//         });
+
+//         colImage.setCellFactory(new Callback<TableColumn<SafePassword, Image>, TableCell<SafePassword, Image>>() {
+//             @Override
+//             public TableCell<SafePassword, Image> call(TableColumn<SafePassword, Image> param) {
+//                 return new TableCell<SafePassword, Image>() {
+//                     private final ImageView imageView = new ImageView();
+
+//                     @Override
+//                     protected void updateItem(Image item, boolean empty) {
+//                         super.updateItem(item, empty);
+//                         if (empty || item == null) {
+//                             setGraphic(null);
+//                         } else {
+//                             imageView.setImage(item);
+//                             imageView.setFitHeight(50);
+//                             imageView.setFitWidth(50);
+//                             setGraphic(imageView);
+//                         }
+//                     }
+//                 };
+//             }
+//         });
+//         return colImage;
+//     }
+
+//     private TableColumn<SafePassword, String> createStringColumn(String title, String property) {
+//         TableColumn<SafePassword, String> column = new TableColumn<>(title);
+//         column.setCellValueFactory(new PropertyValueFactory<>(property));
+//         return column;
+//     }
+
+//     private TableColumn<SafePassword, Void> createActionColumn() {
+//         TableColumn<SafePassword, Void> colActions = new TableColumn<>("Actions");
+//         colActions.setCellFactory(new Callback<>() {
+//             @Override
+//             public TableCell<SafePassword, Void> call(TableColumn<SafePassword, Void> param) {
+//                 TableCell<SafePassword, Void> cell = new TableCell<>() {
+//                     final Button btnDelete = new Button("Delete");
+//                     {
+//                         btnDelete.setOnAction(e -> {
+//                             try {
+//                                 SafePassword safePassword = tableView.getItems().get(getIndex());
+//                                 controller.delete(safePassword);
+//                                 tableView.getItems().remove(safePassword);
+//                             } catch (Exception err) {
+//                                 ViewController.showAlert("Error", "Error deleting SafePassword");
+//                             }
+//                         });
+//                     }
+//                     public void updateItem(Void item, boolean empty) {
+//                         super.updateItem(item, empty);
+//                         setGraphic(empty ? null : btnDelete);
+//                     }
+//                 };
+//                 return cell;
+//             }
+//         });
+//         return colActions;
+//     }
+
+//     public void bindProperties() {
+//         Bindings.bindBidirectional(txtName.textProperty(), controller.nameProperty());
+//         Bindings.bindBidirectional(txtUsername.textProperty(), controller.usernameProperty());
+//         Bindings.bindBidirectional(txtPassword.textProperty(), controller.passwordProperty());
+//         Bindings.bindBidirectional(txtAccessUrl.textProperty(), controller.accessUrlProperty());
+//         Bindings.bindBidirectional(txtNote.textProperty(), controller.noteProperty());
+//         Bindings.bindBidirectional(txtImagePath.textProperty(), controller.imagePathProperty());
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package com.safe.storage.views;
 
 import com.safe.storage.common.ViewController;

@@ -11,6 +11,7 @@ public class SafeFileCode implements Code<SafeFile> {
         object.setData(Crypto.encryptBytes(Login.getUser().getPassword(), object.getData()).get());
         object.setOriginalName(Crypto.encryptString(Login.getUser().getPassword(), object.getOriginalName()).get());
         object.setNote(Crypto.encryptString(Login.getUser().getPassword(), object.getNote()).get());
+        object.setSize(Crypto.obfuscate(object.getSize()));
 
         return object;
     }
@@ -21,7 +22,8 @@ public class SafeFileCode implements Code<SafeFile> {
         object.setData(Crypto.decryptBytes(Login.getUser().getPassword(), object.getData()).get());
         object.setOriginalName(Crypto.decryptString(Login.getUser().getPassword(), object.getOriginalName()).get());
         object.setNote(Crypto.decryptString(Login.getUser().getPassword(), object.getNote()).get());
-        
+        object.setSize(Crypto.deobfuscate(object.getSize()));
+
         return object;
     }
     

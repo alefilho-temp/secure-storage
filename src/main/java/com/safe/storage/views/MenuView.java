@@ -18,6 +18,7 @@ public class MenuView extends FlowPane {
     protected final Text text;
     protected final Button safaPassowordButton;
     protected final Button safeFileButton;
+    protected final Button genericButton;
 
     final BooleanProperty firstTime = new SimpleBooleanProperty(true); // Variable to store the focus on stage load
 
@@ -26,7 +27,8 @@ public class MenuView extends FlowPane {
         text = new Text();
         safaPassowordButton = new Button();
         safeFileButton = new Button();
-        
+        genericButton = new Button();
+
         setAlignment(javafx.geometry.Pos.CENTER);
         setColumnHalignment(javafx.geometry.HPos.CENTER);
         setMaxHeight(USE_PREF_SIZE);
@@ -65,9 +67,20 @@ public class MenuView extends FlowPane {
             ViewController.navigate(new SafeFileView());
         });
 
+        genericButton.setMnemonicParsing(false);
+        genericButton.setStyle("-fx-background-color: #3ab052;");
+        genericButton.setText("CRUD Generico");
+        genericButton.setTextFill(javafx.scene.paint.Color.WHITE);
+        genericButton.setPadding(new Insets(6.0, 30.0, 6.0, 30.0));
+        genericButton.setCursor(Cursor.HAND);
+        genericButton.setOnMouseClicked(arg0 -> {
+            ViewController.navigate(new GenericItemView());
+        });
+
         vBox.getChildren().add(text);
         vBox.getChildren().add(safaPassowordButton);
         vBox.getChildren().add(safeFileButton);
+        vBox.getChildren().add(genericButton);
         getChildren().add(vBox);
     }
 }

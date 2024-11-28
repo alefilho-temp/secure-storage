@@ -26,7 +26,7 @@ public class SafeFileDao implements Dao<SafeFile> {
             pstmt.setString(3, newObject.getOriginalName());
             pstmt.setString(4, newObject.getNote());
             pstmt.setBytes(5, newObject.getData());
-            pstmt.setInt(6, newObject.getSize());
+            pstmt.setLong(6, newObject.getSize());
             pstmt.executeUpdate();
 
             newObject = new SafeFileCode().decode(newObject);
@@ -64,7 +64,7 @@ public class SafeFileDao implements Dao<SafeFile> {
                 safeFile.setOriginalName(rs.getString("originalName"));
                 safeFile.setNote(rs.getString("note"));
                 safeFile.setData(rs.getBytes("data"));
-                safeFile.setSize(rs.getInt("size"));
+                safeFile.setSize(rs.getLong("size"));
 
                 safeFile = new SafeFileCode().decode(safeFile);
 
@@ -90,7 +90,7 @@ public class SafeFileDao implements Dao<SafeFile> {
             pstmt.setString(2, newObject.getOriginalName());
             pstmt.setString(3, newObject.getNote());
             pstmt.setBytes(4, newObject.getData());
-            pstmt.setInt(5, newObject.getSize());
+            pstmt.setLong(5, newObject.getSize());
             pstmt.setInt(6, newObject.getId());
             pstmt.setInt(7, Login.getUser().getId()); 
 
@@ -139,7 +139,7 @@ public class SafeFileDao implements Dao<SafeFile> {
                 safeFile.setOriginalName(rs.getString("originalName"));
                 safeFile.setNote(rs.getString("note"));
                 safeFile.setData(rs.getBytes("data"));
-                safeFile.setSize(rs.getInt("size"));
+                safeFile.setSize(rs.getLong("size"));
 
                 safeFile = new SafeFileCode().decode(safeFile);
 
@@ -173,7 +173,7 @@ public class SafeFileDao implements Dao<SafeFile> {
                 safeFile.setOriginalName(rs.getString("originalName"));
                 safeFile.setNote(rs.getString("note"));
                 safeFile.setData(rs.getBytes("data"));
-                safeFile.setSize(rs.getInt("size"));
+                safeFile.setSize(rs.getLong("size"));
 
                 safeFile = new SafeFileCode().decode(safeFile);
 
@@ -195,7 +195,7 @@ public class SafeFileDao implements Dao<SafeFile> {
                 + "originalName TEXT NOT NULL,"
                 + "note TEXT,"
                 + "data BLOB,"
-                + "size INTEGER NOT NULL"
+                + "size BIGINT NOT NULL"
                 + ");";
         try (
             Connection connection = DBConnection.connect();
