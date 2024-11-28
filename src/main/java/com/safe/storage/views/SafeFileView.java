@@ -21,6 +21,9 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class SafeFileView extends SplitPane {
     private Label lblId = new Label("");
@@ -312,6 +315,29 @@ public class SafeFileView extends SplitPane {
         txtNote.setText(safeFile.getNote());
         lblFilePath.setText(safeFile.getOriginalName());
         lblFileSize.setText(formatBytes(safeFile.getSize()));
+    
+        // Create a temporary file with a unique name
+        if (selectedFile == null) {
+            try {
+                // Create a temporary file in the default temporary file directory
+                Path tempFile = Files.createTempFile("safeFile_", ".tmp");
+                selectedFile = tempFile.toFile(); // Update selectedFile to point to the temp file
+                System.out.println("Temporary file created at: " + selectedFile.getAbsolutePath());
+    
+                // Write the data to the temporary file
+                Files.write(tempFile, safeFile.getData(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // If the selected file already exists, you may want to overwrite it or handle it
+            try {
+                // Write to the existing temporary file
+                Files.write(selectedFile.toPath(), safeFile.getData(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void populateSafeFile(SafeFile safeFile) {
